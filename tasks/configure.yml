@@ -148,7 +148,7 @@
     group: "{{ postgresql_service_group }}"
     mode: u=rwX,g=rwXs,o=rx
 
-- name: PostgreSQL | Restart PostgreSQL
+- name: PostgreSQL | Reload PostgreSQL
   service:
     name: "{{ postgresql_service_name }}"
     state: reloaded
