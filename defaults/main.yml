@@ -18,6 +18,8 @@ postgresql_service_group: "{{ postgresql_admin_user }}"
 postgresql_cluster_name: "main"
 postgresql_cluster_reset: false
 
+postgresql_install_recovery_conf: false
+
 postgresql_database_owner: "{{ postgresql_admin_user }}"
 # Extensions
 postgresql_ext_install_contrib: no
@@ -641,6 +643,26 @@ postgresql_exit_on_error: off
 # Reinitialize after backend crash?
 postgresql_restart_after_crash: on
 
+# recovery.conf
+
+postgresql_restore_command:
+postgresql_archive_cleanup_command:
+postgresql_recovery_end_command:
+
+postgresql_recovery_target_name:
+postgresql_recovery_target_time:
+postgresql_recovery_target_xid:
+
+postgresql_recovery_target_inclusive:
+postgresql_recovery_target:
+postgresql_recovery_target_timeline:
+postgresql_pause_at_recovery_target:    # <= 9.4
+postgresql_recovery_target_action:      # >= 9.5
+postgresql_standby_mode:
+postgresql_primary_conninfo:
+postgresql_primary_slot_name:
+postgresql_trigger_file:
+postgresql_recovery_min_apply_delay:
 
 #------------------------------------------------------------------------------
 # PGTUNE
