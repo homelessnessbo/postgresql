@@ -118,6 +118,23 @@
   register: postgresql_configuration_pt3
   changed_when: "'_OK_' not in postgresql_configuration_pt3.stdout"
 
+- name: PostgreSQL | Place recovery.conf file
+  template:
+    src: "recovery.conf-{{postgresql_version}}.j2"
+    dest: "{{postgresql_data_directory}}/recovery.conf"
+    owner: "{{postgresql_service_user}}"
+    group: "{{postgresql_service_group}}"
+    mode: 0640
+  when: postgresql_install_recovery_conf
+  register: postgresql_configuration_recovery
+
+- name: PostgreSQL | Place recovery.conf symlink to /etc
+  file:
+    src: "{{postgresql_data_directory}}/recovery.conf"
+    dest: "{{postgresql_conf_directory}}/recovery.conf"
+    state: link
+  when: postgresql_install_recovery_conf
+
 - name: PostgreSQL | Create folder for additional configuration files
   file:
     name: "{{postgresql_conf_directory}}/conf.d"
@@ -153,3 +170,9 @@
     name: "{{ postgresql_service_name }}"
     state: reloaded
   when: postgresql_configuration_pt1.changed or postgresql_configuration_pt2.changed or postgresql_configuration_pt3.changed or postgresql_systemd_custom_conf.changed
+
+- name: PostgreSQL | Restart PostgreSQL for recovery
+  service:
+    name: "{{ postgresql_service_name }}"
+    state: restarted
+  when: postgresql_configuration_recovery.changed
