@@ -88,6 +88,15 @@
     mode: 0640
   register: postgresql_configuration_pt2
 
+- name: PostgreSQL | Update restart witness
+  template:
+    src: "postgresql.conf-{{ postgresql_version }}.restart-witness.j2"
+    dest: "{{postgresql_conf_directory}}/.postgresql.conf.restart-witness"
+    owner: "{{ postgresql_service_user }}"
+    group: "{{ postgresql_service_group }}"
+    mode: 0600
+  register: postgresql_restart_witness
+
 - name: PostgreSQL | Update configuration - pt. 3 (pgtune)
   become: true
   become_user: "{{ postgresql_service_user }}"
@@ -169,10 +178,16 @@
   service:
     name: "{{ postgresql_service_name }}"
     state: reloaded
-  when: postgresql_configuration_pt1.changed or postgresql_configuration_pt2.changed or postgresql_configuration_pt3.changed or postgresql_systemd_custom_conf.changed
+  when: >
+    not (postgresql_configuration_recovery.changed
+      or postgresql_restart_witness.changed)
+    and (postgresql_configuration_pt1.changed
+      or postgresql_configuration_pt2.changed
+      or postgresql_configuration_pt3.changed
+      or postgresql_systemd_custom_conf.changed)
 
-- name: PostgreSQL | Restart PostgreSQL for recovery
+- name: PostgreSQL | Restart PostgreSQL
   service:
     name: "{{ postgresql_service_name }}"
     state: restarted
-  when: postgresql_configuration_recovery.changed
+  when: postgresql_configuration_recovery.changed or postgresql_restart_witness.changed
